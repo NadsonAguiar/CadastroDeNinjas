@@ -27,10 +27,11 @@ public class NinjaModel {
     @JoinColumn(name = "missoes_id") //Foreing Key ou chave estrangeira
     private MissoesModel missoes;
 
-
+    // No args
     public NinjaModel() {
     }
 
+    // Quase allArgs
     public NinjaModel(String nome, String email, int idade) {
         this.nome = nome;
         this.email = email;
