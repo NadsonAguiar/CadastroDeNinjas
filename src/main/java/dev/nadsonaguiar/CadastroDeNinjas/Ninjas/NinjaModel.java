@@ -1,6 +1,9 @@
-package dev.nadsonaguiar.CadastroDeNinjas;
+package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 
+import dev.nadsonaguiar.CadastroDeNinjas.Missoes.MissoesModel;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 //Entity ele transforma uma classe em uma entidade BD
 // JPA = Java Persistence API
@@ -11,10 +14,18 @@ public class NinjaModel {
     // Id controla nosso atributo ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) //Gera id sequenciais
-    Long id;
+    private Long id;
+
     private String nome;
+
     private String email;
+
     private int idade;
+
+    // @ManyToOne um ninja tem uma unica missão
+    @ManyToOne
+    @JoinColumn(name = "missoes_id") //Foreing Key ou chave estrangeira
+    private MissoesModel missoes;
 
 
     public NinjaModel() {
