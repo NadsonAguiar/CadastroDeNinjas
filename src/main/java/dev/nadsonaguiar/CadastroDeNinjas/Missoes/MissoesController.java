@@ -6,7 +6,7 @@ package dev.nadsonaguiar.CadastroDeNinjas.Missoes;
 import org.springframework.web.bind.annotation.*;
 
 @RestController // Ela fala que o nosso código é um Controller, e cria uma rota para as nossas API
-@RequestMapping("missoes") // Ela mapeia as nossas API
+@RequestMapping("/missoes") // Ela mapeia as nossas API
 public class MissoesController {
 
     //  GET -- Mandar uma requisição para mostrar as missões
