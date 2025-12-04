@@ -27,6 +27,6 @@ replay_pid*
 # IntelliJ IDEA
 target/
 
-
+data/
 
 .env
