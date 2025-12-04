@@ -1,5 +1,6 @@
 package dev.nadsonaguiar.CadastroDeNinjas.Missoes;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.nadsonaguiar.CadastroDeNinjas.Ninjas.NinjaModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,11 @@ public class MissoesModel {
     private String dificuldade;
 
     // @OneToMany uma missão pode ter vários ninjas
+    /* Quando usarmos o NinjaController para listar os ninjas, vai dar um erro de "loop de serialização", devido à linha abaixo
+    private List<NinjaModel> ninjas, por isso vamos ter que usar a annotation @JsonIgnore */
+    // @OneToMany uma missão pode ter vários ninjas
     @OneToMany(mappedBy = "missoes")
+    @JsonIgnore
     private List<NinjaModel> ninjas;
 
 
