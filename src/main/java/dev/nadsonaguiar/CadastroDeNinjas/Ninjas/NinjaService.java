@@ -5,6 +5,7 @@ package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class NinjaService {
@@ -20,4 +21,18 @@ public class NinjaService {
         return ninjaRepository.findAll(); // Equivale a SELECT
 //        return ninjaRepository.save(); // Equivale a INSERT
     }
+
+    // Listar todos os meus ninjas por ID
+    public NinjaModel listaNinjasPorId(Long id){
+        Optional<NinjaModel> ninjaPorId = ninjaRepository.findById(id); // Equivalente á SELECT * FROM TB_CADASTRO WHERE(findById) id = ?;
+        return ninjaPorId.orElse(null); // Função para caso não tenha o ninja selecionado
+    }
+
+
+
+
+
+
+
+
 }
