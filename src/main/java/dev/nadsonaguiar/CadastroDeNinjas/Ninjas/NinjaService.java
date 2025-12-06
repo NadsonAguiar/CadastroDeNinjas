@@ -2,6 +2,7 @@ package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 
 // SERIALIZAÇÃO NORMAL- Quando pegamos um dado de um sistema e levando para outro, no nosso caso, pegando do BD e mandando para outro local em arquivo JSON
 
+import jakarta.persistence.Id;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +33,11 @@ public class NinjaService {
         return ninjaRepository.save(ninja); // Equivale a INSERT
     }
 
+
+    // Deletar um ninja - Tem que ser um metodo VOID
+    public void deletarNinjaPorId(Long id){
+       ninjaRepository.deleteById(id);
+    }
 
 
 
