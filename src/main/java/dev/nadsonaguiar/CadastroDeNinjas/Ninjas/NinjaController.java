@@ -22,8 +22,9 @@ public class NinjaController {
 
     // Adicionar Ninja (CREATE)
     @PostMapping("/criar")
-    public String criarNinja(){
-        return "Ninja criado";
+    public NinjaModel criarNinja(@RequestBody NinjaModel ninja) // @RequestBody pega uma requisição do corpo e manda para o BD
+    {
+        return ninjaService.criarNinja(ninja); // Estamos a fazer uma serialização inversa JSON → Banco de Dados
     }
 
     // Mostrar todos os Ninjas(READ)
@@ -36,7 +37,7 @@ public class NinjaController {
     @GetMapping("/listar/{id}") //Usando @PathVariable em {id}
     public NinjaModel listarNinjasPorId(@PathVariable Long id) //@PathVariable = Caminho variável, transforma a variável num caminho para a URL
     {
-        return ninjaService.listaNinjasPorId(id); //Id é usado como parâmetro para buscar o
+        return ninjaService.listaNinjasPorId(id); //Id é usado como parâmetro para buscar
     }
 
     // Alterar dados do ninja(UPDATE)

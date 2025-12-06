@@ -1,6 +1,6 @@
 package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 
-// SERIALIZATION - Quando pegamos um dado de um sistema e levando para outro, no nosso caso, pegando do BD e mandando para outro local em arquivo JSON
+// SERIALIZAÇÃO NORMAL- Quando pegamos um dado de um sistema e levando para outro, no nosso caso, pegando do BD e mandando para outro local em arquivo JSON
 
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,6 @@ public class NinjaService {
     // Listar todos os meus ninjas
     public List<NinjaModel> listarNinjas(){
         return ninjaRepository.findAll(); // Equivale a SELECT
-//        return ninjaRepository.save(); // Equivale a INSERT
     }
 
     // Listar todos os meus ninjas por ID
@@ -28,8 +27,10 @@ public class NinjaService {
         return ninjaPorId.orElse(null); // Função para caso não tenha o ninja selecionado
     }
 
-
-
+    // Criar um novo ninja
+    public NinjaModel criarNinja(NinjaModel ninja){
+        return ninjaRepository.save(ninja); // Equivale a INSERT
+    }
 
 
 
