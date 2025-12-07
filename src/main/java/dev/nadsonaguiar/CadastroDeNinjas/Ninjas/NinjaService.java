@@ -12,9 +12,11 @@ import java.util.Optional;
 public class NinjaService {
     //Injeção de dependência para usar NinjaRepository
     private NinjaRepository ninjaRepository;
+    private NinjaMapper ninjaMapper;
 
-    public NinjaService(NinjaRepository ninjaRepository) {
+    public NinjaService(NinjaRepository ninjaRepository, NinjaMapper ninjaMapper) {
         this.ninjaRepository = ninjaRepository;
+        this.ninjaMapper = ninjaMapper;
     }
 
     // Listar todos os meus ninjas
@@ -29,8 +31,10 @@ public class NinjaService {
     }
 
     // Criar um novo ninja
-    public NinjaModel criarNinja(NinjaModel ninja){
-        return ninjaRepository.save(ninja); // Equivale a INSERT
+    public NinjaDTO criarNinja(NinjaDTO ninjaDTO){
+        NinjaModel ninjaModel =  ninjaMapper.map(ninjaDTO); // Equivale a INSERT
+        ninjaModel = ninjaRepository.save(ninjaModel);
+        return ninjaMapper.map(ninjaModel);
     }
 
 

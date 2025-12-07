@@ -22,7 +22,7 @@ public class NinjaController {
 
     // Adicionar Ninja (CREATE)
     @PostMapping("/criar")
-    public NinjaModel criarNinja(@RequestBody NinjaModel ninja) // @RequestBody pega uma requisição do corpo e manda para o BD
+    public NinjaDTO criarNinja(@RequestBody NinjaDTO ninja) // @RequestBody pega uma requisição do corpo e manda para o BD
     {
         return ninjaService.criarNinja(ninja); // Estamos a fazer uma serialização inversa JSON → Banco de Dados
     }
