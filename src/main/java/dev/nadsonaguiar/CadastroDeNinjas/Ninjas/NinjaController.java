@@ -11,7 +11,7 @@ import java.util.List;
 public class NinjaController {
 
     //Injeção de dependência para usar NinjaService
-    private NinjaService ninjaService;
+    private final NinjaService ninjaService;
 
     public NinjaController(NinjaService ninjaService) {
         this.ninjaService = ninjaService;
