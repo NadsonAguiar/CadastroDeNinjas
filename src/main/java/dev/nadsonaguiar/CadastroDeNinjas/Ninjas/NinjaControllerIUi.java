@@ -49,19 +49,17 @@ public class NinjaControllerIUi {
 
 
     @GetMapping("/listar/{id}")
-    public String listarNinjasPorId(@PathVariable Long id, Model model)
-    {
-        NinjaDTO ninja = ninjaService.listaNinjasPorId(id);
-        if (ninja != null){
-            model.addAttribute("ninja",ninja);
-            return "detalhesNinja";
-        }else {
+    public String listarNinjasPorId(@PathVariable Long id, Model model) {
+        NinjaDTO ninja =  ninjaService.listaNinjasPorId(id);
+        if (ninja !=null) {
+            model.addAttribute("ninja", ninja);
+            return "detalhesninja";
+        } else {
             model.addAttribute("mensagem", "Ninja não encontrado");
             return "listarNinjas";
         }
-
-
     }
+
 
 
 
