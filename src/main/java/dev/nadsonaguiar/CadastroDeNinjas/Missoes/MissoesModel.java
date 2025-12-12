@@ -24,6 +24,16 @@ public class MissoesModel {
 
     private String dificuldade;
 
+    private String rank;
+
+    
+
+
+
+
+
+
+
     // @OneToMany uma missão pode ter vários ninjas
     /* Quando usarmos o NinjaController para listar os ninjas, vai dar um erro de "loop de serialização", devido à linha abaixo
     private List<NinjaModel> ninjas, por isso vamos ter que usar a annotation @JsonIgnore */
