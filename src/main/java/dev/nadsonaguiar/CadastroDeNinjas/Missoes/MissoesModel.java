@@ -26,12 +26,6 @@ public class MissoesModel {
 
     private String rank;
 
-    
-
-
-
-
-
 
 
     // @OneToMany uma missão pode ter vários ninjas
