@@ -21,10 +21,24 @@ public class MissoesController {
 
     //  GET -- Mandar uma requisição para mostrar as missões
     @GetMapping("/listar") // Get serve para devolver/mostrar algo para o usuário
-    public List<MissoesDTO> listarMissoes(){
+    public ResponseEntity<List<MissoesDTO>> listarMissoes(){
         List<MissoesDTO> missoes = missoesService.listarMissoes();
-        return missoes;
+        return ResponseEntity.ok(missoes);
     }
+
+    //  GET -- Mandar uma requisição para mostrar as missões, somente pelo ‘ID’
+    @GetMapping("/listar/{id}")
+    public ResponseEntity<?> listarMissoesPorId(@PathVariable Long id){
+        MissoesDTO missao = missoesService.listarMissoesPorId(id);
+        if(missao != null){
+            return ResponseEntity.ok(missao);
+        }else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Missao com id " + id + " não existe nos nossos registros");
+        }
+    }
+
+
 
     //  POST -- Mandar uma requisição para criar as missões
     @PostMapping("/criar") // Post em inglês em Postar/Mandar, então essa annotation serve para o usuário mandar uma requester
@@ -50,8 +64,15 @@ public class MissoesController {
 
     //  DELETE -- Mandar uma requisição para deletar as missões
     @DeleteMapping("/deletar/{id}") //Delete serve para deletar missão
-    public void deletarMissao(@PathVariable Long id){
-        missoesService.deletarMissao(id);
+    public ResponseEntity<String> deletarMissao(@PathVariable Long id){
+        if(missoesService.listarMissoesPorId(id) != null){
+            missoesService.deletarMissao(id);
+            return ResponseEntity.ok("Missao com o ID " + id + " deletado com sucesso");
+        }else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Missao com id" + id + " não existe nos nossos registros");
+        }
+
     }
 
 }

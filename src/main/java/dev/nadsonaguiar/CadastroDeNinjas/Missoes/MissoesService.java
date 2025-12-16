@@ -42,13 +42,24 @@ public class MissoesService {
                .toList();
     }
 
+    // Listar missao por ID
+    public MissoesDTO listarMissoesPorId(Long id){
+            Optional<MissoesModel> missoesPorId = missoesRepository.findById(id);
+            return missoesPorId.map(missoesMapper::map).orElse(null);
+
+    }
+
+
     // Alterar missao
     public MissoesDTO alterarMissao(Long id, MissoesDTO missoesDTO){
         Optional<MissoesModel> missaoExistente = missoesRepository.findById(id);
         if (missaoExistente.isPresent()){
+            // 1. DTO → Model (preparar para salvar)
             MissoesModel missaoAtualizada = missoesMapper.map(missoesDTO);
             missaoAtualizada.setId(id);
+            // 2. Salva a missão atualizada no Banco de Dados
             MissoesModel missaoSalva = missoesRepository.save(missaoAtualizada);
+            // 3. Model → DTO
             return missoesMapper.map(missaoSalva);
         }
         return null;
