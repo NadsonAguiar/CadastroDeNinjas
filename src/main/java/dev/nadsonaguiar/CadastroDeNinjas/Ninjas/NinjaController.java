@@ -1,5 +1,6 @@
 package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class NinjaController {
 
     // Adicionar Ninja (CREATE)
     @PostMapping("/criar")
-    public ResponseEntity<String> criarNinja(@RequestBody NinjaDTO ninja) // @RequestBody pega uma requisição do corpo(JSON) e converte para NinjaDTO
+    public ResponseEntity<String> criarNinja(@Valid @RequestBody NinjaDTO ninja) // @RequestBody pega uma requisição do corpo(JSON) e converte para NinjaDTO
     {
         NinjaDTO ninjaSalvo = ninjaService.criarNinja(ninja); // Estamos a fazer uma serialização inversa JSON → Banco de Dados
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -56,7 +57,7 @@ public class NinjaController {
 
     // Alterar dados do ninja(UPDATE)
     @PutMapping("/alterar/{id}")
-    public ResponseEntity<?> alterarNinjaPorId(@PathVariable Long id, @RequestBody NinjaDTO ninjaAtualizado)
+    public ResponseEntity<?> alterarNinjaPorId(@PathVariable Long id, @Valid @RequestBody NinjaDTO ninjaAtualizado)
     {
         NinjaDTO ninja = ninjaService.atualizarNinja(id, ninjaAtualizado);
 
