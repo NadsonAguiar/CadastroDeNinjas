@@ -18,66 +18,60 @@ public class NinjaController {
         this.ninjaService = ninjaService;
     }
 
-    @GetMapping("/boasvindas")
-    public String boasVindas(){
-        return "Essa é a minha primeira mensagem nessa rota";
-    }
+
 
     // Adicionar Ninja (CREATE)
-    @PostMapping("/criar")
-    public ResponseEntity<String> criarNinja(@Valid @RequestBody NinjaDTO ninja) // @RequestBody pega uma requisição do corpo(JSON) e converte para NinjaDTO
+    @PostMapping
+    public ResponseEntity<NinjaDTO> criar(@Valid @RequestBody NinjaDTO ninja) // @RequestBody pega uma requisição do corpo(JSON) e converte para NinjaDTO
     {
         NinjaDTO ninjaSalvo = ninjaService.criarNinja(ninja); // Estamos a fazer uma serialização inversa JSON → Banco de Dados
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Ninja criado com sucesso: " + ninjaSalvo.getNome() + " (ID): " + ninjaSalvo.getId());
+                .body(ninjaSalvo);
 
     }
 
     // Mostrar todos os Ninjas(READ)
-    @GetMapping("/listar")
-    public ResponseEntity<List<NinjaDTO>> listarNinjas(){
+    @GetMapping
+    public ResponseEntity<List<NinjaDTO>> listar(){
         List<NinjaDTO> ninjas = ninjaService.listarNinjas();
         return ResponseEntity.ok(ninjas);
 
     }
 
     // Mostrar Ninja por ID(READ)
-    @GetMapping("/listar/{id}") //Usando @PathVariable em {id}
-    public ResponseEntity<?> listarNinjasPorId(@PathVariable Long id) //@PathVariable = Caminho variável, transforma a variável num caminho para a URL
+    @GetMapping("/{id}") //Usando @PathVariable em {id}
+    public ResponseEntity<NinjaDTO> buscar(@PathVariable Long id) //@PathVariable = Caminho variável, transforma a variável num caminho para a URL
     {
         NinjaDTO ninja = ninjaService.listaNinjasPorId(id); //Id é usado como parâmetro para buscar
         if(ninja != null){
             return ResponseEntity.ok(ninja);
         } else{
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Ninja com id " + id + " não existe nos nossos registros");
+            return ResponseEntity.notFound().build();
         }
 
     }
 
     // Alterar dados do ninja(UPDATE)
-    @PutMapping("/alterar/{id}")
-    public ResponseEntity<?> alterarNinjaPorId(@PathVariable Long id, @Valid @RequestBody NinjaDTO ninjaAtualizado)
+    @PutMapping("/{id}")
+    public ResponseEntity<NinjaDTO> atualizar(@PathVariable Long id, @Valid @RequestBody NinjaDTO ninjaAtualizado)
     {
         NinjaDTO ninja = ninjaService.atualizarNinja(id, ninjaAtualizado);
 
         if(ninja != null){
             return ResponseEntity.ok(ninja);
         }else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Ninja com id " + id + " não existe nos nossos registros");
+            return ResponseEntity.notFound().build();
         }
     }
 
     // Deletar Ninja(DELETE)
-    @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<String> deletarNinjaPorId(@PathVariable Long id){
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id){
         if (ninjaService.listaNinjasPorId(id) != null){
             ninjaService.deletarNinjaPorId(id);
-            return ResponseEntity.ok("Ninja com o ID " + id + " deletado com sucesso");
+            return ResponseEntity.noContent().build();
         }else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Ninja com id " + id + " não existe nos nossos registros");
+            return ResponseEntity.notFound().build();
         }
 
     }
