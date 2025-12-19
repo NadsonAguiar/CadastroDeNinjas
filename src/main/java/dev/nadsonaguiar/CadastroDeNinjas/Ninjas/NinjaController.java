@@ -2,6 +2,7 @@ package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,7 +33,9 @@ public class NinjaController {
             @ApiResponse(responseCode = "201", description = "Ninja criado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro na criação do ninja")
     })
-    public ResponseEntity<NinjaDTO> criar(@Valid @RequestBody NinjaDTO ninja) // @RequestBody pega uma requisição do corpo(JSON) e converte para NinjaDTO
+    public ResponseEntity<NinjaDTO> criar(
+            @Parameter(description = "Usuário cria o ninja usando o corpo da requisição")
+            @Valid @RequestBody NinjaDTO ninja) // @RequestBody pega uma requisição do corpo(JSON) e converte para NinjaDTO
     {
         NinjaDTO ninjaSalvo = ninjaService.criarNinja(ninja); // Estamos a fazer uma serialização inversa JSON → Banco de Dados
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -42,6 +45,10 @@ public class NinjaController {
 
     // Mostrar todos os Ninjas(READ)
     @GetMapping
+    @Operation(summary = "Lista todos os ninjas", description = "Rota lista todos os ninjas contidos no banco de dados")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "Ninjas listados com sucesso")
+    })
     public ResponseEntity<List<NinjaDTO>> listar(){
         List<NinjaDTO> ninjas = ninjaService.listarNinjas();
         return ResponseEntity.ok(ninjas);
@@ -55,7 +62,9 @@ public class NinjaController {
             @ApiResponse(responseCode = "200", description = "Ninja encontrado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Ninja não encontrado")
     })
-    public ResponseEntity<NinjaDTO> buscar(@PathVariable Long id) //@PathVariable = Caminho variável, transforma a variável num caminho para a URL
+    public ResponseEntity<NinjaDTO> buscar(
+            @Parameter(description = "Usuário manda o id no caminho da requisição ")
+            @PathVariable Long id) //@PathVariable = Caminho variável, transforma a variável num caminho para a URL
     {
         NinjaDTO ninja = ninjaService.listaNinjasPorId(id); //Id é usado como parâmetro para buscar
         if(ninja != null){
@@ -74,7 +83,7 @@ public class NinjaController {
             @ApiResponse(responseCode = "400", description = "Ninja não encontrado, não foi possível alterar")
     })
     public ResponseEntity<NinjaDTO> atualizar(
-            @Parameter(description = "Usuário manda o id no caminho da requisição ")
+            @Parameter(description = "Usuário manda o id no caminho da requisição")
             @PathVariable Long id,
             @Parameter(description = "Usuário manda os dados do ninja a ser atualizado no corpo da requisição")
             @Valid @RequestBody NinjaDTO ninjaAtualizado)
@@ -90,7 +99,14 @@ public class NinjaController {
 
     // Deletar Ninja(DELETE)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id){
+    @Operation(summary = "Deleta um ninja pelo seu ID", description = "Rota deleta um ninja pelo seu ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Ninja deletado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Ninja não encontrado, não foi possível deletar")
+    })
+    public ResponseEntity<Void> deletar(
+            @Parameter(description = "Usuário manda o ID no caminho da requisição")
+            @PathVariable Long id){
         if (ninjaService.listaNinjasPorId(id) != null){
             ninjaService.deletarNinjaPorId(id);
             return ResponseEntity.noContent().build();
