@@ -1,12 +1,17 @@
 package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@Tag(name = "Ninjas", description = "Gerenciamento de ninjas")
 @RestController
 @RequestMapping("/ninjas")
 public class NinjaController {
@@ -22,6 +27,11 @@ public class NinjaController {
 
     // Adicionar Ninja (CREATE)
     @PostMapping
+    @Operation(summary = "Cria um ninja", description = "Rota cria um ninja e inseri no banco de dados")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Ninja criado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro na criação do ninja")
+    })
     public ResponseEntity<NinjaDTO> criar(@Valid @RequestBody NinjaDTO ninja) // @RequestBody pega uma requisição do corpo(JSON) e converte para NinjaDTO
     {
         NinjaDTO ninjaSalvo = ninjaService.criarNinja(ninja); // Estamos a fazer uma serialização inversa JSON → Banco de Dados
@@ -40,6 +50,11 @@ public class NinjaController {
 
     // Mostrar Ninja por ID(READ)
     @GetMapping("/{id}") //Usando @PathVariable em {id}
+    @Operation(summary = "Lista um ninja por ID", description = "Rota lista um ninja por ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ninja encontrado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Ninja não encontrado")
+    })
     public ResponseEntity<NinjaDTO> buscar(@PathVariable Long id) //@PathVariable = Caminho variável, transforma a variável num caminho para a URL
     {
         NinjaDTO ninja = ninjaService.listaNinjasPorId(id); //Id é usado como parâmetro para buscar
@@ -53,7 +68,16 @@ public class NinjaController {
 
     // Alterar dados do ninja(UPDATE)
     @PutMapping("/{id}")
-    public ResponseEntity<NinjaDTO> atualizar(@PathVariable Long id, @Valid @RequestBody NinjaDTO ninjaAtualizado)
+    @Operation(summary = "Atualiza um ninja pelo seu ID", description = "Rota atualiza um ninja pelo seu ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Ninja alterado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Ninja não encontrado, não foi possível alterar")
+    })
+    public ResponseEntity<NinjaDTO> atualizar(
+            @Parameter(description = "Usuário manda o id no caminho da requisição ")
+            @PathVariable Long id,
+            @Parameter(description = "Usuário manda os dados do ninja a ser atualizado no corpo da requisição")
+            @Valid @RequestBody NinjaDTO ninjaAtualizado)
     {
         NinjaDTO ninja = ninjaService.atualizarNinja(id, ninjaAtualizado);
 
