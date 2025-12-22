@@ -34,7 +34,6 @@ public class NinjaController {
             @ApiResponse(responseCode = "400", description = "Erro na criação do ninja")
     })
     public ResponseEntity<NinjaDTO> criar(
-            @Parameter(description = "Usuário cria o ninja usando o corpo da requisição")
             @Valid @RequestBody NinjaDTO ninja) // @RequestBody pega uma requisição do corpo(JSON) e converte para NinjaDTO
     {
         NinjaDTO ninjaSalvo = ninjaService.criarNinja(ninja); // Estamos a fazer uma serialização inversa JSON → Banco de Dados
@@ -85,7 +84,6 @@ public class NinjaController {
     public ResponseEntity<NinjaDTO> atualizar(
             @Parameter(description = "Usuário manda o id no caminho da requisição")
             @PathVariable Long id,
-            @Parameter(description = "Usuário manda os dados do ninja a ser atualizado no corpo da requisição")
             @Valid @RequestBody NinjaDTO ninjaAtualizado)
     {
         NinjaDTO ninja = ninjaService.atualizarNinja(id, ninjaAtualizado);

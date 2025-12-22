@@ -38,6 +38,7 @@ public class NinjaDTO {
     @NotBlank(message = "Rank é obrigatório")
     private String rank;
 
+    @Schema(description = "Missão atribuída ao ninja")
     private MissoesModel missoes;
 
 
