@@ -73,8 +73,31 @@ public class NinjaService {
        ninjaRepository.deleteById(id); // Equivale a DELETE
     }
 
+    // Buscar por nome
+    public List<NinjaDTO> buscarPorNome(String nome){
+        return ninjaRepository.findByNomeContainingIgnoreCase(nome)
+                .stream()
+                .map(ninjaMapper::map)
+                .toList();
+    }
 
+    // Buscar por rank
+    public List<NinjaDTO> buscarPorRank(String rank){
+        return ninjaRepository.findByRank(rank)
+                .stream()
+                .map(ninjaMapper::map)
+                .toList();
+    }
 
+    // Buscar por idade
+    public List<NinjaDTO> buscarPorIdade(Integer idade){
+        return ninjaRepository.findByIdade(idade)
+                .stream()
+                .map(ninjaMapper::map)
+                .toList();
+    }
+
+    //
 
 
 }

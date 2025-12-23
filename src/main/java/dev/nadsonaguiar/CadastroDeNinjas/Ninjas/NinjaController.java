@@ -90,6 +90,27 @@ public class NinjaController {
 
     }
 
+    // Buscar Ninja por filtro especifico
+    @GetMapping("/buscar")
+    @Operation(summary = "Buscar ninja por filtros", description = "Busca ninjas por nome, rank ou idade")
+    public ResponseEntity<List<NinjaDTO>> buscarPorFiltro(
+            @Parameter(description = "Nome (parcial)") @RequestParam(required = false) String nome,
+            @Parameter(description = "Rank") @RequestParam(required = false) String rank,
+            @Parameter(description = "Idade") @RequestParam(required = false) Integer idade
+    ){
+        if (nome != null){
+            return ResponseEntity.ok(ninjaService.buscarPorNome(nome));
+        }
+        if (rank != null) {
+            return ResponseEntity.ok(ninjaService.buscarPorRank(rank));
+        }
+        if (idade != null){
+           return ResponseEntity.ok(ninjaService.buscarPorIdade(idade));
+        }
+        return ResponseEntity.ok(ninjaService.listarNinjas());
+
+    }
+
     // Alterar dados do ninja(UPDATE)
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um ninja pelo seu ID", description = "Rota atualiza um ninja pelo seu ID")

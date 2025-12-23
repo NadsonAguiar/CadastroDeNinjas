@@ -84,6 +84,22 @@ public class MissoesController {
         return ResponseEntity.ok(missoesPage);
     }
 
+    // GET -- Mandar uma requisição para mostrar as missões por filtro
+    @GetMapping("/buscar")
+    @Operation(summary = "Buscar missões por filtros")
+    public ResponseEntity<List<MissoesDTO>> buscar(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String dificuldade,
+            @RequestParam(required = false) String rank
+    ) {
+        if (nome != null) return ResponseEntity.ok(missoesService.buscarPorNome(nome));
+        if (dificuldade != null) return ResponseEntity.ok(missoesService.buscarPorDificuldade(dificuldade));
+        if (rank != null) return ResponseEntity.ok(missoesService.buscarPorRank(rank));
+        return ResponseEntity.ok(missoesService.listarMissoes());
+    }
+
+
+
     //  PUT -- Mandar uma requisição para alterar as missões
     @PutMapping("{id}") // Put serve para alterar
     @Operation(summary = "Atualiza uma missão pelo seu ID", description = "Rota atualiza uma missão pelo seu ID")
