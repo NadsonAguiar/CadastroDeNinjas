@@ -1,5 +1,7 @@
 package dev.nadsonaguiar.CadastroDeNinjas.Exception;
 
+import dev.nadsonaguiar.CadastroDeNinjas.Response.ApiErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,11 +19,37 @@ public class GlobalExceptionHandler {
 
 
     // Diz que esse metodo trata erro de validação
-    @ExceptionHandler
-    public ResponseEntity<Map<String, String>> exception(MethodArgumentNotValidException ex)
+    @ExceptionHandler(MethodArgumentNotValidException.class )
+    public ResponseEntity<ApiErrorResponse> handlerValidationErrors(MethodArgumentNotValidException ex, HttpServletRequest request)
     {
+        String message =
+                // getBindingResult pega o relatório da validação contendo qual campo deu erro, qual anotação falhou, qual mensagem e valor enviado
+                ex.getBindingResult()
+                // getFieldErrors = lista de campos com erro nos DTO
+                .getFieldErrors()
+                // get(0) = Pega apenas o primeiro erro
+                .get(0)
+                // getDefaultMessage = Extrai mensagem escrita no DTO
+                .getDefaultMessage();
 
-        Map<String, String> erros = new HashMap<>();
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                // Status
+                HttpStatus.BAD_REQUEST.value(),
+                //Error
+                "Bad Request",
+                // Mensagem de erro
+                message,
+                //Caminho uri do erro
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.badRequest()
+                .body(error);
+
+
+        // Modo anterior com MAP
+        /* Map<String, String> erros = new HashMap<>();
         // getBindingResult pega o relatório da validação
         ex.getBindingResult()
                 // getFieldErrors = lista de campos com erro
@@ -33,33 +61,34 @@ public class GlobalExceptionHandler {
                 });
         // badRequest = Status 400
         return ResponseEntity.badRequest()
-                .body(erros);
+                .body(erros); */
     }
 
     @ExceptionHandler(NinjaNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNinjaNotFound(NinjaNotFoundException ex) {
+    public ResponseEntity<ApiErrorResponse> handleNinjaNotFound(NinjaNotFoundException ex, HttpServletRequest request) {
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", "Not Found");
-        body.put("message", ex.getMessage());
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(body);
+                .body(error);
     }
 
     @ExceptionHandler(MissaoNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleMissaoNotFound(MissaoNotFoundException ex){
+    public ResponseEntity<ApiErrorResponse> handleMissaoNotFound(MissaoNotFoundException ex, HttpServletRequest request){
 
-        Map<String,Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", "Not Found");
-        body.put("message", ex.getMessage());
-
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(body);
+                .body(error);
 
     }
 
