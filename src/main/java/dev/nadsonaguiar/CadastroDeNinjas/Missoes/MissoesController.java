@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +44,7 @@ public class MissoesController {
     }
 
     //  GET -- Mandar uma requisição para mostrar as missões
-    @GetMapping // Get serve para devolver/mostrar algo para o usuário
+    @GetMapping("/todos") // Get serve para devolver/mostrar algo para o usuário
     @Operation(summary = "Lista todas as missões", description = "Rota lista todas as missões contidas no banco de dados")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Missões listadas com sucesso")
@@ -68,6 +72,17 @@ public class MissoesController {
         }
     }
 
+    // GET -- Mandar uma requisição para mostrar as missões paginadas
+    @GetMapping
+    @Operation(summary = "Lista missões por paginação", description = "Rota lista as missões apenas da pagina escolhida")
+    public ResponseEntity<Page<MissoesDTO>> listarPorPaginacao(
+            @PageableDefault(page = 0, size = 10)
+            @ParameterObject
+            Pageable pageable)
+    {
+        Page<MissoesDTO> missoesPage = missoesService.listarMissoesPaginado(pageable);
+        return ResponseEntity.ok(missoesPage);
+    }
 
     //  PUT -- Mandar uma requisição para alterar as missões
     @PutMapping("{id}") // Put serve para alterar

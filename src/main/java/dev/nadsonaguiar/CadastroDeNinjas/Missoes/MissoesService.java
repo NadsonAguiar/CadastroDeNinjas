@@ -1,5 +1,8 @@
 package dev.nadsonaguiar.CadastroDeNinjas.Missoes;
 
+import dev.nadsonaguiar.CadastroDeNinjas.Exception.MissaoNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,11 +47,18 @@ public class MissoesService {
 
     // Listar missao por ID
     public MissoesDTO listarMissoesPorId(Long id){
-            Optional<MissoesModel> missoesPorId = missoesRepository.findById(id);
-            return missoesPorId.map(missoesMapper::map).orElse(null);
+
+        return missoesRepository.findById(id)
+                .map(missoesMapper::map)
+                .orElseThrow(() -> new MissaoNotFoundException(id));
 
     }
 
+    // Listar Missoes Paginadas
+    public Page<MissoesDTO> listarMissoesPaginado(Pageable pageable){
+       Page<MissoesModel> missaoPage = missoesRepository.findAll(pageable);
+               return missaoPage.map(missoesMapper::map);
+    }
 
     // Alterar missao
     public MissoesDTO alterarMissao(Long id, MissoesDTO missoesDTO){
@@ -69,5 +79,6 @@ public class MissoesService {
     public void deletarMissao(Long id){
         missoesRepository.deleteById(id);
     }
+
 
 }

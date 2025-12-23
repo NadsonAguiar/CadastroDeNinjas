@@ -7,6 +7,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +47,7 @@ public class NinjaController {
     }
 
     // Mostrar todos os Ninjas(READ)
-    @GetMapping
+    @GetMapping("/todos")
     @Operation(summary = "Lista todos os ninjas", description = "Rota lista todos os ninjas contidos no banco de dados")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Ninjas listados com sucesso")
@@ -53,6 +57,18 @@ public class NinjaController {
         return ResponseEntity.ok(ninjas);
 
     }
+
+    // Mostra os ninjas paginados
+    @GetMapping
+    @Operation(summary = "Lista ninjas por paginação", description = "Rota lista os ninja apenas da pagina escolhida")
+    public ResponseEntity<Page<NinjaDTO>> listarPorPaginacao(
+            @PageableDefault(page = 0,size = 10)
+            @ParameterObject
+            Pageable pageable){
+        Page<NinjaDTO> ninjas = ninjaService.listarNinjasPaginados(pageable);
+        return ResponseEntity.ok(ninjas);
+    }
+
 
     // Mostrar Ninja por ID(READ)
     @GetMapping("/{id}") //Usando @PathVariable em {id}
