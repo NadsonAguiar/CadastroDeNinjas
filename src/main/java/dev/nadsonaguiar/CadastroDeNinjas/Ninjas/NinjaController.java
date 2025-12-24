@@ -98,16 +98,8 @@ public class NinjaController {
             @Parameter(description = "Rank") @RequestParam(required = false) String rank,
             @Parameter(description = "Idade") @RequestParam(required = false) Integer idade
     ){
-        if (nome != null){
-            return ResponseEntity.ok(ninjaService.buscarPorNome(nome));
-        }
-        if (rank != null) {
-            return ResponseEntity.ok(ninjaService.buscarPorRank(rank));
-        }
-        if (idade != null){
-           return ResponseEntity.ok(ninjaService.buscarPorIdade(idade));
-        }
-        return ResponseEntity.ok(ninjaService.listarNinjas());
+
+        return ResponseEntity.ok(ninjaService.buscarComFiltros(nome, rank, idade));
 
     }
 
@@ -130,6 +122,30 @@ public class NinjaController {
         }else {
             return ResponseEntity.notFound().build();
         }
+    }
+    // Atribuir ninja a uma missão
+    @PutMapping("/{ninjaId}/missao/{missaoId}")
+    @Operation(summary = "Atribuir missão a um ninja")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Missão atribuída"),
+            @ApiResponse(responseCode = "404", description = "Ninja ou missão não encontrados")
+    })
+    public ResponseEntity<NinjaDTO> atribuirMissao(
+            @Parameter(description = "ID do ninja") @PathVariable Long ninjaId,
+            @Parameter(description = "ID da missão") @PathVariable Long missaoId
+    ){
+        NinjaDTO ninja = ninjaService.atribuirMissao(ninjaId, missaoId);
+        return ResponseEntity.ok(ninja);
+    }
+
+    // Remover ninja de uma missão
+    @DeleteMapping("/{ninjaId}/missao")
+    @Operation(summary = "Remover ninja de sua missão")
+    public ResponseEntity<NinjaDTO> removerMissao(
+            @Parameter(description = "ID do ninja") @PathVariable Long ninjaId
+    ){
+        NinjaDTO ninja = ninjaService.removerMissao(ninjaId);
+        return ResponseEntity.ok(ninja);
     }
 
     // Deletar Ninja(DELETE)

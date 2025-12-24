@@ -2,11 +2,17 @@ package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 
 // SERIALIZAÇÃO NORMAL- Quando pegamos um dado de um sistema e levando para outro, no nosso caso, pegando do BD e mandando para outro local em arquivo JSON
 
+import dev.nadsonaguiar.CadastroDeNinjas.Exception.MissaoNotFoundException;
 import dev.nadsonaguiar.CadastroDeNinjas.Exception.NinjaNotFoundException;
+import dev.nadsonaguiar.CadastroDeNinjas.Missoes.MissoesModel;
+import dev.nadsonaguiar.CadastroDeNinjas.Missoes.MissoesRepository;
+import dev.nadsonaguiar.CadastroDeNinjas.Specification.NinjaSpecification;
 import jakarta.persistence.Id;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,10 +23,12 @@ public class NinjaService {
     //Injeção de dependência para usar NinjaRepository e NinjaMapper
     private final NinjaRepository ninjaRepository;
     private final NinjaMapper ninjaMapper;
+    private final MissoesRepository missoesRepository;
 
-    public NinjaService(NinjaRepository ninjaRepository, NinjaMapper ninjaMapper) {
+    public NinjaService(NinjaRepository ninjaRepository, NinjaMapper ninjaMapper, MissoesRepository missoesRepository) {
         this.ninjaRepository = ninjaRepository;
         this.ninjaMapper = ninjaMapper;
+        this.missoesRepository = missoesRepository;
     }
 
     // Criar um novo ninja
@@ -73,31 +81,41 @@ public class NinjaService {
        ninjaRepository.deleteById(id); // Equivale a DELETE
     }
 
-    // Buscar por nome
-    public List<NinjaDTO> buscarPorNome(String nome){
-        return ninjaRepository.findByNomeContainingIgnoreCase(nome)
+    // Buscar por filtros
+    public List<NinjaDTO> buscarComFiltros(String nome, String rank, Integer idade){
+        Specification<NinjaModel> spec = Specification.allOf(
+                NinjaSpecification.nomeLike(nome),
+                NinjaSpecification.rankEquals(rank),
+                NinjaSpecification.idadeEquals(idade)
+        );
+        return ninjaRepository.findAll(spec)
                 .stream()
                 .map(ninjaMapper::map)
                 .toList();
+
     }
 
-    // Buscar por rank
-    public List<NinjaDTO> buscarPorRank(String rank){
-        return ninjaRepository.findByRank(rank)
-                .stream()
-                .map(ninjaMapper::map)
-                .toList();
+    // Atribuir ninja a uma missão
+    @Transactional
+    public NinjaDTO atribuirMissao(Long ninjaId, Long missaoId){
+        NinjaModel ninja = ninjaRepository.findById(ninjaId)
+                .orElseThrow(() -> new NinjaNotFoundException(ninjaId));
+        MissoesModel missao = missoesRepository.findById(missaoId)
+                .orElseThrow(() -> new MissaoNotFoundException(missaoId));
+        ninja.setMissoes(missao);
+        NinjaModel salvo = ninjaRepository.save(ninja);
+        return ninjaMapper.map(salvo);
+
     }
 
-    // Buscar por idade
-    public List<NinjaDTO> buscarPorIdade(Integer idade){
-        return ninjaRepository.findByIdade(idade)
-                .stream()
-                .map(ninjaMapper::map)
-                .toList();
+    // Remover ninja de uma missão
+    @Transactional
+    public NinjaDTO removerMissao(Long ninjaID){
+        NinjaModel ninja = ninjaRepository.findById(ninjaID)
+                .orElseThrow(() -> new NinjaNotFoundException(ninjaID));
+        ninja.setMissoes(null);
+        NinjaModel salvo = ninjaRepository.save(ninja);
+        return ninjaMapper.map(salvo);
     }
-
-    //
-
 
 }
