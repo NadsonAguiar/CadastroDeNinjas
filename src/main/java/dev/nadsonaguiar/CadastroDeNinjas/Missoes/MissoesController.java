@@ -3,6 +3,7 @@ package dev.nadsonaguiar.CadastroDeNinjas.Missoes;
 // LOCALHOST:8080 queremos criar todas para o meu servidor
 
 
+import dev.nadsonaguiar.CadastroDeNinjas.Ninjas.NinjaDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -98,6 +99,15 @@ public class MissoesController {
         return ResponseEntity.ok(missoesService.listarMissoes());
     }
 
+    // GET -- Mandar uma requisição para mostrar os ninjas na missão escolhida
+    @GetMapping("/{missaoId}/ninjas")
+    @Operation(summary = "Listar ninjas de uma missão")
+    public ResponseEntity<List<NinjaDTO>> listarNinjas(
+            @Parameter(description = "ID da missão") @PathVariable Long missaoId
+    ) {
+        List<NinjaDTO> ninjas = missoesService.listarNinjasDaMissao(missaoId);
+        return ResponseEntity.ok(ninjas);
+    }
 
 
     //  PUT -- Mandar uma requisição para alterar as missões

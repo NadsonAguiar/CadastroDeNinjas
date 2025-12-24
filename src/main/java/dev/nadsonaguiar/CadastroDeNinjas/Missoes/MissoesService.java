@@ -2,6 +2,7 @@ package dev.nadsonaguiar.CadastroDeNinjas.Missoes;
 
 import dev.nadsonaguiar.CadastroDeNinjas.Exception.MissaoNotFoundException;
 import dev.nadsonaguiar.CadastroDeNinjas.Ninjas.NinjaDTO;
+import dev.nadsonaguiar.CadastroDeNinjas.Ninjas.NinjaMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,13 +15,15 @@ import java.util.stream.Collectors;
 public class MissoesService {
 
     //injeção de dependência
-    private MissoesMapper missoesMapper;
-    private MissoesRepository missoesRepository;
+    private final MissoesMapper missoesMapper;
+    private final MissoesRepository missoesRepository;
+    private final NinjaMapper ninjaMapper;
 
     //construtor para dependências
-    public MissoesService(MissoesMapper missoesMapper, MissoesRepository missoesRepository) {
+    public MissoesService(MissoesMapper missoesMapper, MissoesRepository missoesRepository, NinjaMapper ninjaMapper) {
         this.missoesMapper = missoesMapper;
         this.missoesRepository = missoesRepository;
+        this.ninjaMapper = ninjaMapper;
     }
 
     //Criar missao
@@ -102,6 +105,16 @@ public class MissoesService {
         return missoesRepository.findByDificuldade(dificuldade)
                 .stream()
                 .map(missoesMapper::map)
+                .toList();
+    }
+
+    // Listar ninjas de uma missão
+    public List<NinjaDTO> listarNinjasDaMissao(Long missaoId){
+        MissoesModel missao = missoesRepository.findById(missaoId)
+                .orElseThrow(() -> new MissaoNotFoundException(missaoId));
+        return missao.getNinjas()
+                .stream()
+                .map(ninjaMapper::map)
                 .toList();
     }
 
