@@ -46,8 +46,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest()
                 .body(error);
-
-
         // Modo anterior com MAP
         /* Map<String, String> erros = new HashMap<>();
         // getBindingResult pega o relatório da validação
@@ -64,6 +62,7 @@ public class GlobalExceptionHandler {
                 .body(erros); */
     }
 
+    // Exception para ninja não encontrado
     @ExceptionHandler(NinjaNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNinjaNotFound(NinjaNotFoundException ex, HttpServletRequest request) {
 
@@ -78,6 +77,7 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
+    // Exception para Missão não encontrada
     @ExceptionHandler(MissaoNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleMissaoNotFound(MissaoNotFoundException ex, HttpServletRequest request){
 
