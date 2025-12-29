@@ -2,10 +2,7 @@ package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 
 import dev.nadsonaguiar.CadastroDeNinjas.Missoes.MissoesModel;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
