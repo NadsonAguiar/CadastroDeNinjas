@@ -1,14 +1,42 @@
 services:
   postgres:
     image: postgres
+    container_name: postgres-ninja
+    restart: always
     environment:
+      POSTGRES_DB: cadastro_ninjas
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
     ports:
       - "5432:5432"
     volumes:
-      - data_sql:/var/lib/postgresql
-
-
+      - postgres_data:/var/lib/postgresql/18/data
+    networks:
+      - ninjas-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d cadastro_ninjas" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cadastro-ninjas-app
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cadastro_ninjas
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+    networks:
+      - ninjas-network
 volumes:
-  data_sql:
+  postgres_data:
+networks:
+  ninjas-network:
+    driver: bridge
