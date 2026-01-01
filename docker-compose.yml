@@ -1,42 +1,83 @@
 services:
+  # ===== SERVIÇO DO BANCO DE DADOS =====
+  # Aqui a gente bota o nome do serviço (como ele vai aparecer la no terminal depois)
   postgres:
+    # Imagem oficial do PostgreSQL que será baixada do Docker Hub
     image: postgres
+    # Nome fixo do container (facilita docker ps, logs, exec, etc.)
     container_name: postgres-ninja
+    # Reinicia automaticamente se o container cair ou o Docker reiniciar
     restart: always
+    # Variáveis de ambiente usadas APENAS pelo container do Postgres
+    # Elas definem como o banco será criado na PRIMEIRA inicialização
     environment:
-      POSTGRES_DB: cadastro_ninjas
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: ${POSTGRES_DB}     # Nome do banco que será criado
+      POSTGRES_USER: ${POSTGRES_USER}   # Usuário do banco
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}   # Senha do usuário
+    # Mapeamento de portas:
+    # porta 5432 do PC real → porta 5432 do container
+    # É por isso que o DataGrip usa localhost: 5432
     ports:
       - "5432:5432"
+
+    # Volume para persistência dos dados
+    # Sem isso, ao remover o container, o banco seria apagado
     volumes:
       - postgres_data:/var/lib/postgresql/18/data
+
+    # Conecta esse container à rede Docker chamada ninjas-network
     networks:
       - ninjas-network
+
+    # Healthcheck: Docker testa se o Postgres está realmente pronto
     healthcheck:
+      # Comando que verifica se o banco aceita conexões
       test: [ "CMD-SHELL", "pg_isready -U postgres -d cadastro_ninjas" ]
+      # Intervalo entre os testes
       interval: 10s
+      # Quantas tentativas antes de marcar como unhealthy
       retries: 5
+      # Tempo inicial de espera antes de começar a testar
       start_period: 30s
+      # Tempo máximo que cada teste pode demorar
       timeout: 10s
+
+  # ===== SERVIÇO DA APLICAÇÃO SPRING BOOT =====
   app:
+    # Docker vai construir a imagem a partir do Dockerfile
     build:
-      context: .
+      context: .  # Diretório raiz do projeto (contexto de build)
       dockerfile: Dockerfile
+    # Nome fixo do container da aplicação
     container_name: cadastro-ninjas-app
+    # Mapeamento de portas:
+    # porta 8081 do PC → porta 8080 do container
     ports:
       - "8081:8080"
+    # Garante que o app só suba depois que o Postgres estiver saudável
     depends_on:
       postgres:
         condition: service_healthy
+
+    # Variáveis de ambiente usadas PELO SPRING BOOT
+    # Elas dizem para o app COMO se conectar ao banco
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cadastro_ninjas
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    # Conecta o app à mesma rede do Postgres
     networks:
       - ninjas-network
+
+# ===== DEFINIÇÃO DOS VOLUMES =====
 volumes:
   postgres_data:
+  # Volume gerenciado pelo Docker (fica fora do container)
+
+
+# ===== DEFINIÇÃO DAS REDES =====
 networks:
+  # Chamando ela de app-network
   ninjas-network:
+    # Rede bridge: rede privada do Docker
     driver: bridge
