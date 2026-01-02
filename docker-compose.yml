@@ -72,9 +72,8 @@ services:
 
 # ===== DEFINIÇÃO DOS VOLUMES =====
 volumes:
-  postgres_data:
   # Volume gerenciado pelo Docker (fica fora do container)
-
+  postgres_data:
 
 # ===== DEFINIÇÃO DAS REDES =====
 networks:
