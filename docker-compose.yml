@@ -62,6 +62,7 @@ services:
     # Variáveis de ambiente usadas PELO SPRING BOOT
     # Elas dizem para o app COMO se conectar ao banco
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
