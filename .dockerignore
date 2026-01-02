@@ -1,0 +1,20 @@
+# Maven
+target/
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+
+# Docker
+docker-compose.yml
+
+# OS - Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+

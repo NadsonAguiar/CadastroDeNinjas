@@ -27,7 +27,7 @@ public class NinjaController {
         this.ninjaService = ninjaService;
     }
 
-
+    // CRUD - CREATE, READ, UPDATE, DELETE
 
     // Adicionar Ninja (CREATE)
     @PostMapping
@@ -89,7 +89,7 @@ public class NinjaController {
 
     }
 
-    // Buscar Ninja por filtro especifico
+    // Buscar Ninja por filtro especifico(GET)
     @GetMapping("/buscar")
     @Operation(summary = "Buscar ninja por filtros", description = "Busca ninjas por nome, rank ou idade")
     public ResponseEntity<List<NinjaDTO>> buscarPorFiltro(
@@ -122,7 +122,7 @@ public class NinjaController {
             return ResponseEntity.notFound().build();
         }
     }
-    // Atribuir ninja a uma missão
+    // Atribuir ninja a uma missão(POST)
     @PutMapping("/{ninjaId}/missao/{missaoId}")
     @Operation(summary = "Atribuir missão a um ninja")
     @ApiResponses(value = {
@@ -137,7 +137,7 @@ public class NinjaController {
         return ResponseEntity.ok(ninja);
     }
 
-    // Remover ninja de uma missão
+    // Remover ninja de uma missão atribuída(DELETE)
     @DeleteMapping("/{ninjaId}/missao")
     @Operation(summary = "Remover ninja de sua missão")
     public ResponseEntity<NinjaDTO> removerMissao(
