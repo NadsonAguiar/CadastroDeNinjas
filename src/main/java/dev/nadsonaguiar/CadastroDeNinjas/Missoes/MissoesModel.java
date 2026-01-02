@@ -3,9 +3,8 @@ package dev.nadsonaguiar.CadastroDeNinjas.Missoes;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.nadsonaguiar.CadastroDeNinjas.Ninjas.NinjaModel;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 
 import java.util.List;
 

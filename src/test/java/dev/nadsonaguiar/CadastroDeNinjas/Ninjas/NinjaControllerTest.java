@@ -3,7 +3,6 @@ package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.nadsonaguiar.CadastroDeNinjas.Exception.GlobalExceptionHandler;
 import dev.nadsonaguiar.CadastroDeNinjas.Exception.NinjaNotFoundException;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -196,7 +195,7 @@ public class NinjaControllerTest {
                 .andExpect(jsonPath("$.data.rank").value("Jounin"));
     }
 
-    // Teste PUT para simular um ninja não existente para atualizar (400 - não encontrado)
+    // Teste PUT para simular um ninja não existente para atualizar (404 - não encontrado)
     @Test
     void deveRetornar404AoAtualizarNinjaInexistente() throws Exception{
         when(ninjaService.atualizarNinja(eq(99L), any(NinjaDTO.class))).thenThrow(new NinjaNotFoundException(99L));
@@ -234,5 +233,19 @@ public class NinjaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sucess").value(true))
                 .andExpect(jsonPath("$.message").value("Ninja deletado com sucesso"));
+    }
+
+    // Teste DELETE para simular exception para ninja não existe (404 - não encontrado)
+    @Test
+    void deveRetornar404AoDeletarNinjaInexistente() throws Exception{
+        when(ninjaService.listaNinjasPorId(99L)).thenThrow(new NinjaNotFoundException(99L));
+
+        mockMvc.perform(delete("/ninjas/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Ninja não encontrado com ID: 99"));
+
+
+
     }
 }
