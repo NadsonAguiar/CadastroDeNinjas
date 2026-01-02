@@ -8,6 +8,8 @@ import dev.nadsonaguiar.CadastroDeNinjas.Missoes.MissoesModel;
 import dev.nadsonaguiar.CadastroDeNinjas.Missoes.MissoesRepository;
 import dev.nadsonaguiar.CadastroDeNinjas.Specification.NinjaSpecification;
 import jakarta.persistence.Id;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class NinjaService {
+
     //Injeção de dependência para usar NinjaRepository e NinjaMapper
     private final NinjaRepository ninjaRepository;
     private final NinjaMapper ninjaMapper;
@@ -32,6 +35,7 @@ public class NinjaService {
     }
 
     // Criar um novo ninja
+    @CacheEvict(value = "ninjas", allEntries = true)
     public NinjaDTO criarNinja(NinjaDTO ninjaDTO){
         NinjaModel ninjaModel =  ninjaMapper.map(ninjaDTO); // Equivale a INSERT
         ninjaModel = ninjaRepository.save(ninjaModel);
@@ -39,6 +43,7 @@ public class NinjaService {
     }
 
     // Listar todos os meus ninjas
+    @Cacheable("ninjas")
     public List<NinjaDTO> listarNinjas(){
         List<NinjaModel> ninjas = ninjaRepository.findAll(); // Equivale a SELECT
         return ninjas.stream()
@@ -47,6 +52,7 @@ public class NinjaService {
     }
 
     // Listar os meus ninjas por ID
+    @Cacheable(value = "ninjas", key = "#id")
     public NinjaDTO listaNinjasPorId(Long id)
     {
         // Equivalente á SELECT * FROM TB_CADASTRO WHERE(findById) id = ?;
@@ -63,6 +69,7 @@ public class NinjaService {
     }
 
     // Alterar ninja
+    @CacheEvict(value = "ninjas", allEntries = true)
     public NinjaDTO atualizarNinja(Long id, NinjaDTO ninjaDTO)
     {
         Optional<NinjaModel> ninjaExistente = ninjaRepository.findById(id);
@@ -76,6 +83,7 @@ public class NinjaService {
     }
 
     // Deletar um ninja - Tem que ser um metodo VOID
+    @CacheEvict(value = "ninjas", allEntries = true)
     public void deletarNinjaPorId(Long id)
     {
        ninjaRepository.deleteById(id); // Equivale a DELETE
