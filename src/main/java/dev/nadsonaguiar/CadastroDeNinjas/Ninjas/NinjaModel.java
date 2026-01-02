@@ -25,7 +25,7 @@ public class NinjaModel {
     @Column (name = "nome")
     private String nome;
 
-    @Column(unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Column (name = "idade")
@@ -35,7 +35,7 @@ public class NinjaModel {
     private String rank;
 
     // @ManyToOne muitos ninjas para uma unica missão
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "missoes_id") //Foreing Key ou chave estrangeira
     private MissoesModel missoes;
 
