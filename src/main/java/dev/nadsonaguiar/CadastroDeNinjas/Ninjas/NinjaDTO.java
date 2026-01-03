@@ -10,14 +10,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
+import java.io.Serializable;
 
 
 @Schema(description = "DTO para criação de Ninja")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NinjaDTO {
+public class NinjaDTO{
 
     private Long id;
     @Schema(description = "Nome do ninja", example = "Naruto Uzumaki")

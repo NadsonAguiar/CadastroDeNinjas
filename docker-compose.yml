@@ -3,7 +3,7 @@ services:
   # Aqui a gente bota o nome do serviço (como ele vai aparecer la no terminal depois)
   postgres:
     # Imagem oficial do PostgreSQL que será baixada do Docker Hub
-    image: postgres
+    image: postgres:17
     # Nome fixo do container (facilita docker ps, logs, exec, etc.)
     container_name: postgres-ninja
     # Reinicia automaticamente se o container cair ou o Docker reiniciar
@@ -41,6 +41,15 @@ services:
       start_period: 30s
       # Tempo máximo que cada teste pode demorar
       timeout: 10s
+
+  # ===== SERVIÇO DE CACHE =====
+  redis:
+    image: redis:7-alpine
+    container_name: redis-ninjas
+    ports:
+      - "6379:6379"
+    networks:
+      - ninjas-network
 
   # ===== SERVIÇO DA APLICAÇÃO SPRING BOOT =====
   app:

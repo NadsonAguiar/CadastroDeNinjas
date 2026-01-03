@@ -8,6 +8,10 @@ import dev.nadsonaguiar.CadastroDeNinjas.Missoes.MissoesModel;
 import dev.nadsonaguiar.CadastroDeNinjas.Missoes.MissoesRepository;
 import dev.nadsonaguiar.CadastroDeNinjas.Specification.NinjaSpecification;
 import jakarta.persistence.Id;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,21 +36,26 @@ public class NinjaService {
     }
 
     // Criar um novo ninja
+    @Caching(evict = {
+            @CacheEvict(value = "ninjasList", allEntries = true) // Apaga tudo do cache, já que quando um ‘item’ muda, lista fica desatualizada
+    })
     public NinjaDTO criarNinja(NinjaDTO ninjaDTO){
-        NinjaModel ninjaModel =  ninjaMapper.map(ninjaDTO); // Equivale a INSERT
-        ninjaModel = ninjaRepository.save(ninjaModel);
+        NinjaModel ninjaModel =  ninjaMapper.map(ninjaDTO);
+        ninjaModel = ninjaRepository.save(ninjaModel); // Equivale a INSERT
         return ninjaMapper.map(ninjaModel);
     }
 
     // Listar todos os meus ninjas
+    @Cacheable("ninjasList")
     public List<NinjaDTO> listarNinjas(){
-        List<NinjaModel> ninjas = ninjaRepository.findAll(); // Equivale a SELECT
+        List<NinjaModel> ninjas = ninjaRepository.findAll(); // Equivale a SELECT *
         return ninjas.stream()
                 .map(ninjaMapper::map)
                 .collect(Collectors.toList());
     }
 
     // Listar os meus ninjas por ID
+    @Cacheable(value = "ninjas", key = "#id") // Realiza a busca uma vez no cacheName -> (key -> value), ex: "ninjas" → (1 → NinjaDTO), se não tiver, executa o metodo e vai no Banco
     public NinjaDTO listaNinjasPorId(Long id)
     {
         // Equivalente á SELECT * FROM TB_CADASTRO WHERE(findById) id = ?;
@@ -63,6 +72,10 @@ public class NinjaService {
     }
 
     // Alterar ninja
+    @Caching(put = @CachePut(value = "ninja", key = "#id"), // Diferente do Cacheable, ele sempre executa o metodo, atualiza o banco e cache
+            evict = {
+            @CacheEvict(value = "ninjasList", allEntries = true) // Apaga tudo, se usado em combo(Caching), nesse caso PUT, atualiza cache individual e invalida cache da lista
+    })
     public NinjaDTO atualizarNinja(Long id, NinjaDTO ninjaDTO)
     {
         Optional<NinjaModel> ninjaExistente = ninjaRepository.findById(id);
@@ -76,6 +89,10 @@ public class NinjaService {
     }
 
     // Deletar um ninja - Tem que ser um metodo VOID
+    @Caching(evict = {  // CacheEvict = “Depois desse metodo, apague esse cache”
+            @CacheEvict(value = "ninja", key = "#id"),
+            @CacheEvict(value = "ninjasList", allEntries = true)
+    })
     public void deletarNinjaPorId(Long id)
     {
        ninjaRepository.deleteById(id); // Equivale a DELETE
