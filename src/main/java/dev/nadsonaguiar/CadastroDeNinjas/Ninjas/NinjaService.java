@@ -37,7 +37,7 @@ public class NinjaService {
 
     // Criar um novo ninja
     @Caching(evict = {
-            @CacheEvict(value = "ninjasList", allEntries = true) // Apaga tudo do cache, já que quando um ‘item’ muda, lista fica desatualizada
+            @CacheEvict(value = {"ninjas-page", "ninjas-filter", "ninjas-list"}, allEntries = true) // Apaga tudo do cache, já que quando um ‘item’ muda, lista fica desatualizada
     })
     public NinjaDTO criarNinja(NinjaDTO ninjaDTO){
         NinjaModel ninjaModel =  ninjaMapper.map(ninjaDTO);
@@ -46,7 +46,7 @@ public class NinjaService {
     }
 
     // Listar todos os meus ninjas
-    @Cacheable("ninjasList")
+    @Cacheable("ninjas-list") // Realiza a busca uma vez no cacheName -> (key -> value), ex: "ninjasList" → (1 → NinjaDTO), se não tiver, executa o metodo e vai no Banco
     public List<NinjaDTO> listarNinjas(){
         List<NinjaModel> ninjas = ninjaRepository.findAll(); // Equivale a SELECT *
         return ninjas.stream()
@@ -55,7 +55,9 @@ public class NinjaService {
     }
 
     // Listar os meus ninjas por ID
-    @Cacheable(value = "ninjas", key = "#id") // Realiza a busca uma vez no cacheName -> (key -> value), ex: "ninjas" → (1 → NinjaDTO), se não tiver, executa o metodo e vai no Banco
+    @Cacheable(value = "ninjas-by-id", key = "#id", unless = "#result == null", condition = "#id >=0")/* Realiza a busca uma vez no cacheName -> (key -> value), ex: "ninjas" → (key: ninjas::1 → valor: NinjaDTO),
+     se não tiver, executa o metodo e vai no Banco, o "unless" serve para decidir após executar, caso o “id” seja null no banco, não salva resultado no cache,
+     já o "condition" decide antes da consulta, caso o "id" seja menor que 0 nem usa cache */
     public NinjaDTO listaNinjasPorId(Long id)
     {
         // Equivalente á SELECT * FROM TB_CADASTRO WHERE(findById) id = ?;
@@ -66,15 +68,41 @@ public class NinjaService {
     }
 
     // Lista ninjas por paginação
-    public Page<NinjaDTO> listarNinjasPaginados(Pageable pageable){
+    @Cacheable(
+            value = "ninjas-page",
+            key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort" // cada combinação vai ser "ninjas-page::0(pg)-10(size)-nome,asc"
+    )
+    public PageDTO<NinjaDTO> listarNinjasPaginados(Pageable pageable){
         Page<NinjaModel> ninjaPage = ninjaRepository.findAll(pageable);
-        return ninjaPage.map(ninjaMapper::map);
+        // Converte Page<NinjaModel> para Page<NinjaDTO>
+        Page<NinjaDTO> dtoPage = ninjaPage.map(ninjaMapper::map);
+        return new PageDTO<>(dtoPage);
+    }
+
+    // Buscar por filtros
+    @Cacheable(
+            value = "ninjas-filter",
+            key = "T(java.util.Objects).hash(#nome, #rank, #idade)", // Regra de ouro para Specification + Cache: Toda a variação lógica da query precisa gerar uma variação única de cache
+            condition = "#nome != null || #rank != null || #idade != null",
+            unless = "#result.isEmpty()"
+    )
+    public List<NinjaDTO> buscarComFiltros(String nome, String rank, Integer idade){
+        Specification<NinjaModel> spec = Specification.allOf(
+                NinjaSpecification.nomeLike(nome),
+                NinjaSpecification.rankEquals(rank),
+                NinjaSpecification.idadeEquals(idade)
+        );
+        return ninjaRepository.findAll(spec)
+                .stream()
+                .map(ninjaMapper::map)
+                .toList();
+
     }
 
     // Alterar ninja
-    @Caching(put = @CachePut(value = "ninja", key = "#id"), // Diferente do Cacheable, ele sempre executa o metodo, atualiza o banco e cache
+    @Caching(put = @CachePut(value = "ninja", key = "#id"), // Caching serve para forma combos, CachePut diferente do Cacheable, ele sempre executa o metodo, atualiza o banco e cache
             evict = {
-            @CacheEvict(value = "ninjasList", allEntries = true) // Apaga tudo, se usado em combo(Caching), nesse caso PUT, atualiza cache individual e invalida cache da lista
+            @CacheEvict(value = {"ninjas-by-id","ninjas-list","ninjas-page", "ninjas-filter"}, allEntries = true) // CacheEvict Apaga tudo, se usado em combo(Caching), nesse caso PUT, atualiza cache individual e invalida cache da lista
     })
     public NinjaDTO atualizarNinja(Long id, NinjaDTO ninjaDTO)
     {
@@ -89,27 +117,10 @@ public class NinjaService {
     }
 
     // Deletar um ninja - Tem que ser um metodo VOID
-    @Caching(evict = {  // CacheEvict = “Depois desse metodo, apague esse cache”
-            @CacheEvict(value = "ninja", key = "#id"),
-            @CacheEvict(value = "ninjasList", allEntries = true)
-    })
+    @CacheEvict(value = {"ninjas-by-id","ninjas-list","ninjas-page", "ninjas-filter"}, allEntries = true) // CacheEvict = “Depois desse metodo, apague esse cache”
     public void deletarNinjaPorId(Long id)
     {
        ninjaRepository.deleteById(id); // Equivale a DELETE
-    }
-
-    // Buscar por filtros
-    public List<NinjaDTO> buscarComFiltros(String nome, String rank, Integer idade){
-        Specification<NinjaModel> spec = Specification.allOf(
-                NinjaSpecification.nomeLike(nome),
-                NinjaSpecification.rankEquals(rank),
-                NinjaSpecification.idadeEquals(idade)
-        );
-        return ninjaRepository.findAll(spec)
-                .stream()
-                .map(ninjaMapper::map)
-                .toList();
-
     }
 
     // Atribuir ninja a uma missão
