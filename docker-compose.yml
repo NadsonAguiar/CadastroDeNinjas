@@ -43,6 +43,7 @@ services:
       timeout: 10s
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   # ===== SERVIÇO DE CACHE =====
   redis:
     image: redis:7-alpine
@@ -51,6 +52,8 @@ services:
       - "6379:6379"
     networks:
       - ninjas-network
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
