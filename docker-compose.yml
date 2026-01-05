@@ -42,6 +42,7 @@ services:
       # Tempo máximo que cada teste pode demorar
       timeout: 10s
 
+<<<<<<< Updated upstream
   # ===== SERVIÇO DE CACHE =====
   redis:
     image: redis:7-alpine
@@ -50,6 +51,8 @@ services:
       - "6379:6379"
     networks:
       - ninjas-network
+=======
+>>>>>>> Stashed changes
 
   # ===== SERVIÇO DA APLICAÇÃO SPRING BOOT =====
   app:
