@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class NinjaService {
+
     //Injeção de dependência para usar NinjaRepository e NinjaMapper
     private final NinjaRepository ninjaRepository;
     private final NinjaMapper ninjaMapper;
@@ -121,6 +122,20 @@ public class NinjaService {
     public void deletarNinjaPorId(Long id)
     {
        ninjaRepository.deleteById(id); // Equivale a DELETE
+    }
+
+    // Buscar por filtros
+    public List<NinjaDTO> buscarComFiltros(String nome, String rank, Integer idade){
+        Specification<NinjaModel> spec = Specification.allOf(
+                NinjaSpecification.nomeLike(nome),
+                NinjaSpecification.rankEquals(rank),
+                NinjaSpecification.idadeEquals(idade)
+        );
+        return ninjaRepository.findAll(spec)
+                .stream()
+                .map(ninjaMapper::map)
+                .toList();
+
     }
 
     // Atribuir ninja a uma missão
