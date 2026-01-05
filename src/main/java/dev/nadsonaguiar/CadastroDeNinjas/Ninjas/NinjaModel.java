@@ -35,7 +35,7 @@ public class NinjaModel {
     private String rank;
 
     // @ManyToOne muitos ninjas para uma unica missão
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "missoes_id") //Foreing Key ou chave estrangeira
     private MissoesModel missoes;
 

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -60,11 +61,13 @@ public class NinjaController {
     // Mostra os ninjas paginados
     @GetMapping
     @Operation(summary = "Lista ninjas por paginação", description = "Rota lista os ninja apenas da pagina escolhida")
-    public ResponseEntity<Page<NinjaDTO>> listarPorPaginacao(
-            @PageableDefault(page = 0,size = 10)
-            @ParameterObject
-            Pageable pageable){
-        Page<NinjaDTO> ninjas = ninjaService.listarNinjasPaginados(pageable);
+    public ResponseEntity<PageDTO<NinjaDTO>> listarPorPaginacao(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+        )
+    {
+        Pageable pageable = PageRequest.of(page, size);
+        PageDTO<NinjaDTO> ninjas = ninjaService.listarNinjasPaginados(pageable);
         return ResponseEntity.ok(ninjas);
     }
 
