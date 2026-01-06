@@ -124,20 +124,6 @@ public class NinjaService {
        ninjaRepository.deleteById(id); // Equivale a DELETE
     }
 
-    // Buscar por filtros
-    public List<NinjaDTO> buscarComFiltros(String nome, String rank, Integer idade){
-        Specification<NinjaModel> spec = Specification.allOf(
-                NinjaSpecification.nomeLike(nome),
-                NinjaSpecification.rankEquals(rank),
-                NinjaSpecification.idadeEquals(idade)
-        );
-        return ninjaRepository.findAll(spec)
-                .stream()
-                .map(ninjaMapper::map)
-                .toList();
-
-    }
-
     // Atribuir ninja a uma missão
     @Transactional
     public NinjaDTO atribuirMissao(Long ninjaId, Long missaoId){

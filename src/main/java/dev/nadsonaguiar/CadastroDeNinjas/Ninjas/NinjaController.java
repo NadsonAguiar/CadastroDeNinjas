@@ -31,7 +31,7 @@ public class NinjaController {
     // CRUD - CREATE, READ, UPDATE, DELETE
 
     // Adicionar Ninja (CREATE)
-    @PostMapping
+    @PostMapping("/criar")
     @Operation(summary = "Cria um ninja", description = "Rota cria um ninja e inseri no banco de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Ninja criado com sucesso"),
