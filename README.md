@@ -1,3 +1,7 @@
+![Version](https://img.shields.io/badge/version-v2.0.0-blue)
+![Java](https://img.shields.io/badge/Java-21-red)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
+
 # 🥷 CadastroDeNinjas
 
 Sistema de gerenciamento de ninjas e missões com autenticação JWT, cache Redis e arquitetura containerizada.
