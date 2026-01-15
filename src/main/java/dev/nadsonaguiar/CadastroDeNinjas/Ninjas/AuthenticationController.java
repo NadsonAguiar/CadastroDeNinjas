@@ -3,7 +3,6 @@ package dev.nadsonaguiar.CadastroDeNinjas.Ninjas;
 import dev.nadsonaguiar.CadastroDeNinjas.Infra.Security.TokenService;
 import dev.nadsonaguiar.CadastroDeNinjas.User.*;
 import jakarta.validation.Valid;
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.rmi.registry.Registry;
 
 @RestController
 @RequestMapping("auth")

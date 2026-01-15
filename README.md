@@ -1,58 +1,118 @@
-# CadastroDeNinjas
+# 🥷 CadastroDeNinjas
+
+Sistema de gerenciamento de ninjas e missões com autenticação JWT, cache Redis e arquitetura containerizada.
+
+---
+
 ## 🚀 Tecnologias
 
-- Java 21
-- Spring Boot 3.5.8
-- PostgreSQL 17
-- Redis (Cache)
-- Flyway (Migrations)
-- Docker + Docker Compose
-- Lombok
+- **Java 21** - Linguagem principal
+- **Spring Boot 3.5.8** - Framework
+- **Spring Security** - Autenticação e autorização
+- **JWT (jjwt 0.12.6)** - Tokens de autenticação
+- **PostgreSQL 17** - Banco de dados relacional
+- **Redis Alpine** - Sistema de cache
+- **Flyway** - Migrations e versionamento de schema
+- **Docker + Docker Compose** - Containerização
+- **Lombok** - Redução de boilerplate
+- **H2** - Banco em memória para testes
 
+---
 
-## 🛢Banco de Dados(Postgres)
-O projeto utiliza **Postgres** como o banco de dados relacional principal:
+## 📋 Funcionalidades
 
-- Armazena dados persistentes de **ninjas** e **missões**
-- Relacionamento **Many-to-One** entre ninjas e missões
-- Gerenciado via **Flyway** para versionamento  de schema
+### 🔐 Autenticação JWT
+- Registro e login de usuários
+- Tokens JWT com expiração de 24h
+- Senhas criptografadas com BCrypt
+- Sistema de roles (USER/ADMIN)
+- Filtro de autenticação para rotas protegidas
 
-### 🔄 Migrations (Flyway):
+### 👤 Gestão de Usuários
+- Criação de contas com diferentes níveis de acesso
+- Autenticação stateless via JWT
+- CORS configurado para APIs
+
+### 🥷 CRUD de Ninjas
+- Listagem completa com cache
+- Busca por ID
+- Criação, atualização e remoção (apenas ADMIN)
+- Relacionamento Many-to-One com missões
+
+### 🎯 Sistema de Missões
+- Cadastro de missões com níveis de dificuldade
+- Associação de ninjas às missões
+- Gestão completa via API REST
+
+### ⚡ Cache Inteligente
+- Cache individual (10 minutos)
+- Cache de lista (5 minutos)
+- Invalidação automática em operações de escrita
+
+---
+
+## 🔒 Controle de Acesso
+
+### Endpoints Públicos
+| Método | Endpoint | Descrição | Acesso |
+|--------|----------|-----------|---------|
+| `POST` | `/auth/register` | Criar usuário | 🌐 Público |
+| `POST` | `/auth/login` | Autenticar | 🌐 Público |
+
+### Endpoints Protegidos
+| Método | Endpoint | Descrição | Acesso |
+|--------|----------|-----------|---------|
+| `POST` | `/ninjas` | Criar ninja | 🔒 ADMIN |
+| `PUT` | `/ninjas/{id}` | Atualizar ninja | 🔒 ADMIN |
+| `DELETE` | `/ninjas/{id}` | Deletar ninja | 🔒 ADMIN |
+ `GET` | `/ninjas` | Listar todos | 🔒 ADMIN |
+| `GET` | `/ninjas/{id}` | Buscar por ID | 🔒 ADMIN 
+### Roles Disponíveis
+- **USER** → Visualização de login e register
+- **ADMIN** → Acesso completo (CRUD)
+
+---
+
+## 🛢️ Banco de Dados (PostgreSQL)
+
+### Estrutura de Tabelas
+
+```sql
+-- Usuários (Autenticação)
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Ninjas
+CREATE TABLE ninjas (
+    id BIGSERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    idade INTEGER,
+    rank VARCHAR(50)
+);
+
+-- Missões
+CREATE TABLE missoes (
+    id BIGSERIAL PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,
+    dificuldade VARCHAR(50),
+    rank VARCHAR(50)
+);
+```
+
+### 🔄 Migrations (Flyway)
 - Versionamento automático de schema
 - Scripts em `src/main/resources/db/migration/`
-- Execução automática na inicialização da aplicação
-- `spring.jpa.hibernate.ddl-auto=validate` (apenas valida, não altera)
+- Execução automática na inicialização
+- `spring.jpa.hibernate.ddl-auto=validate` (somente validação)
 
+### ⚙️ Configuração Docker
 
-
-### 📋 Estrutura de tabelas:
-```sql
--- Tabela de Ninjas
-ninjas (
-  id BIGSERIAL PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  idade INTEGER,
-  rank VARCHAR(50)
-)
-
--- Tabela de Missões
-missoes (
-  id BIGSERIAL PRIMARY KEY,
-  nome VARCHAR(200) NOT NULL,
-  dificuldade VARCHAR(50),
-  rank VARCHAR(50)
-)
-
--- Tabela de relacionamento
-ninja_missao (
-  ALTER TABLE tb_cadastro
-  ADD CONSTRAINT fk_missoes
-  FOREIGN KEY(missoes_id)
-  REFERENCES tb_missoes(id);
-)
-```
-### ⚙️ Configuração (Docker):
 ```yaml
 postgres:
   image: postgres:17
@@ -66,47 +126,53 @@ postgres:
   volumes:
     - postgres_data:/var/lib/postgresql/data
 ```
+
 ---
 
 ## ⚡ Cache (Redis)
 
-O projeto utiliza Redis para cache de dados:
-
+### Estratégia de Cache
 - **Cache individual:** 10 minutos (busca por ID)
 - **Cache de lista:** 5 minutos (lista completa)
 - **Invalidação automática:** ao criar/atualizar/deletar
 
-### Configuração:
+### Operações com Cache
+
+| Operação | Cache Aplicado |
+|----------|----------------|
+| `GET /ninjas/{id}` | Cache individual |
+| `GET /ninjas` | Cache de lista |
+| `POST /ninjas` | Invalida lista |
+| `PUT /ninjas/{id}` | Atualiza individual + invalida lista |
+| `DELETE /ninjas/{id}` | Remove individual + invalida lista |
+
+### Configuração Docker
+
 ```yaml
 redis:
   image: redis:alpine
+  container_name: redis-ninjas
   ports:
     - "6379:6379"
 ```
 
-### Estratégia de cache:
-- `GET /ninjas/{id}` → Cache individual
-- `GET /ninjas` → Cache de lista
-- `POST /ninjas` → Invalida lista
-- `PUT /ninjas/{id}` → Atualiza cache individual + invalida lista
-- `DELETE /ninjas/{id}` → Remove cache individual + invalida lista
+---
 
 ## 🐳 Docker
 
-O projeto é totalmente **containerizado** com Docker Compose, facilitando o setup e deploy.
+### 📦 Arquitetura de Containers
 
-### 📦 Containers:
 ```
 ┌─────────────────────────────────────────┐
 │  cadastro-ninjas-app  (Spring Boot)     │ :8081
 ├─────────────────────────────────────────┤
-│  postgres-ninjas      (PostgreSQL 18)   │ :5432
+│  postgres-ninjas      (PostgreSQL 17)   │ :5432
 ├─────────────────────────────────────────┤
 │  redis-ninjas         (Redis Alpine)    │ :6379
 └─────────────────────────────────────────┘
 ```
 
-### 🚀 Como rodar:
+### 🚀 Como Executar
 
 **1. Clone o repositório:**
 ```bash
@@ -120,6 +186,11 @@ cp .env.example .env
 # Edite o .env com suas credenciais
 ```
 
+**Variáveis necessárias no `.env`:**
+```env
+POSTGRES_PASSWORD=sua_senha_postgres
+```
+
 **3. Suba os containers:**
 ```bash
 docker compose up -d --build
@@ -129,22 +200,30 @@ docker compose up -d --build
 - **API:** http://localhost:8081
 - **Documentação:** http://localhost:8081/swagger-ui.html
 
-### 🛠️ Comandos úteis:
+### 🛠️ Comandos Úteis
+
 ```bash
-# Ver logs
+# Ver logs da aplicação
 docker compose logs -f app
 
 # Parar containers
 docker compose down
 
-# Parar e limpar dados
+# Parar e limpar volumes
 docker compose down -v
 
-# Rebuild forçado
+# Rebuild completo
 docker compose up -d --build --force-recreate
+
+# Acessar container da aplicação
+docker exec -it cadastro-ninjas-app sh
+
+# Acessar PostgreSQL
+docker exec -it postgres-ninjas psql -U postgres -d cadastro_ninjas
 ```
 
-### 📁 Estrutura Docker:
+### 📁 Estrutura Docker
+
 ```
 .
 ├── Dockerfile              # Multi-stage build
@@ -154,9 +233,10 @@ docker compose up -d --build --force-recreate
 └── .dockerignore          # Arquivos ignorados no build
 ```
 
-### ⚙️ Dockerfile (Multi-stage):
+### ⚙️ Dockerfile (Multi-stage)
+
 ```dockerfile
-# ETAPA 1: Build (Maven + JDK)
+# ETAPA 1: Build (Maven + JDK 21)
 FROM maven:3.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 COPY pom.xml .
@@ -164,7 +244,7 @@ RUN mvn dependency:go-offline
 COPY src/ src/
 RUN mvn package -DskipTests
 
-# ETAPA 2: Runtime (apenas JRE)
+# ETAPA 2: Runtime (apenas JRE 21)
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
@@ -174,80 +254,153 @@ CMD ["java", "-jar", "app.jar"]
 
 **Vantagens:**
 - ✅ Imagem final ~250MB (vs ~800MB sem multi-stage)
-- ✅ Cache de dependências otimizado
-- ✅ Build rápido (30s após primeira vez)
+- ✅ Cache de dependências Maven otimizado
+- ✅ Build rápido (~30s após primeira execução)
+- ✅ Apenas JRE em produção (segurança e performance)
+
+---
+
+## 🔐 Guia de Uso - Autenticação
+
+### 1️⃣ Registrar Usuário
+
+```bash
+curl -X POST http://localhost:8081/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "senha123",
+    "role": "ADMIN"
+  }'
+```
+
+### 2️⃣ Fazer Login
+
+```bash
+curl -X POST http://localhost:8081/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "senha123"
+  }'
+```
+
+**Resposta:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### 3️⃣ Usar Token em Requisições
+
+```bash
+curl -X POST http://localhost:8081/ninjas \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Naruto Uzumaki",
+    "email": "naruto@konoha.com",
+    "idade": 17,
+    "rank": "GENIN"
+  }'
+```
+
+### 🛡️ Segurança Implementada
+- ✅ Senhas criptografadas com BCrypt
+- ✅ Tokens JWT com expiração (24 horas)
+- ✅ Filtro de autenticação automático
+- ✅ CORS configurado
+- ✅ API stateless (sem sessões)
+- ✅ Proteção CSRF desabilitada (REST API)
+
+---
+
+## 📚 Estrutura do Projeto
+
+```
+src/
+├── main/
+│   ├── java/dev/nadsonaguiar/CadastroDeNinjas/
+│   │   ├── Security/
+│   │   │   ├── JwtService.java                 # Geração/validação JWT
+│   │   │   ├── JwtAuthFilter.java              # Filtro de autenticação
+│   │   │   ├── SecurityConfig.java             # Config Spring Security
+│   │   │   └── CustomUserDetailsService.java   # Carregamento usuários
+│   │   ├── User/
+│   │   │   ├── UserModel.java                  # Entidade User
+│   │   │   ├── UserRepository.java             # Repository JPA
+│   │   │   ├── UserService.java                # Lógica de negócio
+│   │   │   └── AuthController.java             # Endpoints auth
+│   │   ├── Ninjas/
+│   │   │   ├── NinjaController.java
+│   │   │   ├── NinjaService.java
+│   │   │   ├── NinjaRepository.java
+│   │   │   ├── NinjaModel.java
+│   │   │   ├── NinjaDTO.java
+│   │   │   └── NinjaMapper.java
+│   │   ├── Missoes/
+│   │   │   ├── MissaoController.java
+│   │   │   ├── MissaoService.java
+│   │   │   ├── MissaoRepository.java
+│   │   │   └── MissaoModel.java
+│   │   └── Config/
+│   │       └── RedisConfig.java
+│   └── resources/
+│       ├── db/migration/
+│       │   ├── V1__create_tables.sql
+│       │   ├── V2__add_rank_tb_cadastro.sql
+│       │   └── V3__create_users_table.sql
+│       ├── static/                             # Frontend HTML
+│       └── application.properties
+└── test/
+    ├── java/
+    └── resources/
+        └── application.properties              # Config H2
+```
 
 ---
 
 ## 🧪 Testes
 
-### Ambiente de teste:
+### Ambiente de Teste
 - **Banco de dados:** H2 (em memória)
 - **Configuração:** `src/test/resources/application.properties`
+- **Escopo:** Testes unitários e de integração
 
-### Rodar testes:
+### Executar Testes
+
 ```bash
 # Via Maven
 mvn test
 
-# Via Docker (durante build)
+# Via Docker (executa durante o build)
 docker compose up --build
+
+# Com cobertura
+mvn test jacoco:report
 ```
+---
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT.
 
 ---
 
-## 📚 Estrutura do Projeto
-```
-src/
-├── main/
-│   ├── java/
-│   │   └── dev/nadsonaguiar/CadastroDeNinjas/
-│   │       ├── Ninjas/
-│   │       │   ├── NinjaController.java
-│   │       │   ├── NinjaService.java
-│   │       │   ├── NinjaRepository.java
-│   │       │   ├── NinjaModel.java
-│   │       │   ├── NinjaDTO.java
-│   │       │   └── NinjaMapper.java
-│   │       ├── Missoes/
-│   │       │   └── ...
-│   │       └── Config/
-│   │           └── RedisConfig.java
-│   └── resources/
-│       ├── db/migration/          # Scripts Flyway
-│       ├── static/                # Frontend HTML
-│       └── application.properties
-└── test/
-    ├── java/
-    └── resources/
-        └── application.properties # Config de teste (H2)
-```
+## 👨‍💻 Autor
+
+**Nadson Aguiar**  
+GitHub: [@NadsonAguiar](https://github.com/NadsonAguiar)
 
 ---
 
+## 🤝 Contribuindo
 
-### Próximos passos
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull requests.
 
-🔐 PRÓXIMA ETAPA: Spring Security + JWT (3-4 dias)
-
-O que vamos fazer:
-
-1. Adicionar dependências (5min)
-2. Criar entidade User (15min)
-3. Implementar JWT (1-2h)
-4. Configurar Security (1-2h)
-5. Proteger endpoints (30min)
-6. Testar (30min)
-
-Endpoints que vamos criar:
-
-POST /auth/register  → Criar usuário
-POST /auth/login     → Retorna JWT token
-GET  /ninjas         → Público (todos podem ver)
-POST /ninjas         → Protegido (só ADMIN)
-PUT  /ninjas/{id}    → Protegido (só ADMIN)
-DELETE /ninjas/{id}  → Protegido (só ADMIN)
-
-Roles:
-- 'USER' → pode ver ninjas
-- 'ADMIN' → pode criar/editar/deletar
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/NovaFeature`)
+3. Commit suas mudanças (`git commit -m 'Add: nova feature'`)
+4. Push para a branch (`git push origin feature/NovaFeature`)
+5. Abra um Pull Request

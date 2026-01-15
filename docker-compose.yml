@@ -42,8 +42,6 @@ services:
       # Tempo máximo que cada teste pode demorar
       timeout: 10s
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   # ===== SERVIÇO DE CACHE =====
   redis:
     image: redis:7-alpine
@@ -52,10 +50,6 @@ services:
       - "6379:6379"
     networks:
       - ninjas-network
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
   # ===== SERVIÇO DA APLICAÇÃO SPRING BOOT =====
   app:
@@ -81,6 +75,7 @@ services:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      JWT_SECRET: my-secret-key
     # Conecta o app à mesma rede do Postgres
     networks:
       - ninjas-network
